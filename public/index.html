@@ -243,71 +243,49 @@
   </div>
 
   <!-- FIXED SCRIPT -->
-  <script>
-    function applyThemeFromStorage() {
-      const saved = localStorage.getItem("ocs-theme");
-      document.body.classList.toggle("light", saved === "light");
-      document.getElementById("themeLabel").innerText = saved === "light" ? "Light mode" : "Dark mode";
+<script>
+  async function optimizeCode() {
+    const code = document.getElementById("inputCode").value;
+    const result = document.getElementById("result");
+
+    if (!code.trim()) {
+      result.innerHTML = "<span style='color:red;'>Please paste your code first.</span>";
+      return;
     }
 
-    function toggleTheme() {
-      const isLight = document.body.classList.toggle("light");
-      localStorage.setItem("ocs-theme", isLight ? "light" : "dark");
-      document.getElementById("themeLabel").innerText = isLight ? "Light mode" : "Dark mode";
-    }
+    result.innerHTML = "<div class='loading'>⏳ Optimizing your code...</div>";
 
-    applyThemeFromStorage();
+    try {
+      const response = await fetch("/api/optimize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `Optimize this code:\n${code}`
+        })
+      });
 
-    // MAIN FUNCTION
-    async function optimizeCode() {
-      const code = document.getElementById("inputCode").value;
-      const result = document.getElementById("result");
+      const data = await response.json();
 
-      if (!code.trim()) {
-        result.innerHTML = "<span style='color:red;'>Please paste your code first.</span>";
+      if (data.error) {
+        result.innerHTML = "<span style='color:red;'>❌ " + data.error + "</span>";
         return;
       }
 
-      result.innerHTML = "<div class='loading'>⏳ Processing...</div>";
-
-      try {
-        const response = await fetch("/api/optimize", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message: `Optimize this code:\n${code}`
-          })
-        });
-
-        const data = await response.json();
-
-        if (data && data.response) {
-          result.innerHTML = data.response.replace(/\n/g, "<br>");
-        } else {
-          result.innerHTML = "⚠ No response from agent.";
-        }
-      } catch (error) {
-        result.innerHTML = "<span style='color:red;'>❌ Error: " + error + "</span>";
+      if (data.response) {
+        result.innerHTML = data.response.replace(/\n/g, "<br>");
+      } else {
+        result.innerHTML = "⚠ No response from agent.";
       }
+    } catch (error) {
+      result.innerHTML = "<span style='color:red;'>❌ Error: " + error + "</span>";
     }
+  }
 
-    function clearInput() {
-      document.getElementById("inputCode").value = "";
-      document.getElementById("result").innerHTML =
-        "<span style='opacity:0.7;'>Your optimized code & explanation will appear here...</span>";
-    }
-
-    function downloadResult() {
-      const text = document.getElementById("result").innerText;
-      const blob = new Blob([text], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "optimized_code.txt";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  </script>
-
+  function clearInput() {
+    document.getElementById("inputCode").value = "";
+    document.getElementById("result").innerHTML =
+      "<span style='opacity:0.7;'>Your optimized code & explanation will appear here...</span>";
+  }
+</script>
 </body>
 </html>
