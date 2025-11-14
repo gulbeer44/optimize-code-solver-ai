@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Optimize Code Solver</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --bg: #0d0f11;
+      --bg-alt: #1a1d21;
+      --border: #333;
+      --accent: #16A9FF;
+      --accent-soft: #0c87c7;
+      --accent-green: #4DFF4D;
+      --text: #ffffff;
+      --code: #00ff99;
+    }
+
+    body.light {
+      --bg: #f5f5f7;
+      --bg-alt: #ffffff;
+      --border: #cccccc;
+      --accent: #0066cc;
+      --accent-soft: #004c99;
+      --accent-green: #00994d;
+      --text: #111111;
+      --code: #008f5a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      gap: 12px;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 30% 30%, #4DFF4D, #16A9FF);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Consolas", monospace;
+      font-weight: 700;
+      font-size: 20px;
+      color: #0d0f11;
+      box-shadow: 0 0 18px rgba(22, 169, 255, 0.5);
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-block h1 span.accent {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      font-size: 13px;
+      opacity: 0.8;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid var(--accent);
+      width: 0;
+      animation: typing 3s steps(40, end) forwards, blinkCursor 0.7s infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to   { width: 330px; } /* adjust for subtitle width */
+    }
+
+    @keyframes blinkCursor {
+      0%, 49% { border-color: var(--accent); }
+      50%,100% { border-color: transparent; }
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-alt);
+      opacity: 0.9;
+    }
+
+    .theme-toggle {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-alt);
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .theme-toggle span.icon {
+      font-size: 14px;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-alt);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 14px 14px 16px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.35);
+      display: flex;
+      flex-direction: column;
+      min-height: 280px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .panel-header .label {
+      opacity: 0.85;
+    }
+
+    .chip {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid var(--border);
+      opacity: 0.8;
+    }
+
+    .chip.green {
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    textarea {
+      width: 100%;
+      flex: 1;
+      background: #101317;
+      color: var(--code);
+      border: 1px solid var(--border);
+      padding: 10px;
+      font-size: 14px;
+      font-family: "Consolas", monospace;
+      resize: vertical;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    body.light textarea {
+      background: #f3f3f7;
+      color: #1b4d2f;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 8px 14px;
+      background: var(--accent);
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+      border-radius: 6px;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button:hover {
+      background: var(--accent-soft);
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button.secondary:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .output-content {
+      flex: 1;
+      background: #101317;
+      border-radius: 6px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      overflow-y: auto;
+      font-family: "Consolas", monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+
+    body.light .output-content {
+      background: #f3f3f7;
+      color: #222;
+    }
+
+    .loading {
+      color: var(--accent-green);
+      font-size: 13px;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      font-size: 11px;
+      opacity: 0.75;
+      text-align: center;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="logo-area">
+        <div class="logo-circle">{ }</div>
+        <div class="title-block">
+          <h1>
+            Optimize <span class="accent">Code Solver</span>
+          </h1>
+          <div class="subtitle">
+            AI that cleans, fixes & explains your code.
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <span class="icon">🌙</span>
+          <span id="themeLabel">Dark mode</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- LEFT: INPUT PANEL -->
+      <section class="panel">
+        <div class="panel-header">
+          <span class="label">Input Code</span>
+          <span class="chip">Paste any language</span>
+        </div>
+        <textarea id="inputCode" placeholder="Paste your code here..."></textarea>
+        <div class="btn-row">
+          <button onclick="optimizeCode()">
+            ⚡ Optimize
+          </button>
+          <button class="secondary" onclick="clearInput()">
+            🧹 Clear
+          </button>
+        </div>
+      </section>
+
+      <!-- RIGHT: OUTPUT PANEL -->
+      <section class="panel">
+        <div class="panel-header">
+          <span class="label">AI Output</span>
+          <span class="chip green">Optimized + Explained</span>
+        </div>
+        <div id="result" class="output-content">
+          <span style="opacity:0.7;">Your optimized code & explanation will appear here...</span>
+        </div>
+        <div class="btn-row">
+          <button class="secondary" onclick="downloadResult()">
+            ⬇️ Download Result
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <div class="footer-note">
+      Built by <b>Gulbeer Singh</b> • Your personal AI code optimizer.  
+    </div>
+  </div>
+
+  <script>
+    // ---- THEME TOGGLE ----
+    function applyThemeFromStorage() {
+      const saved = localStorage.getItem("ocs-theme");
+      if (saved === "light") {
+        document.body.classList.add("light");
+        document.getElementById("themeLabel").innerText = "Light mode";
+      } else {
+        document.body.classList.remove("light");
+        document.getElementById("themeLabel").innerText = "Dark mode";
+      }
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle("light");
+      const isLight = document.body.classList.contains("light");
+      localStorage.setItem("ocs-theme", isLight ? "light" : "dark");
+      document.getElementById("themeLabel").innerText = isLight ? "Light mode" : "Dark mode";
+    }
+
+    applyThemeFromStorage();
+
+    // ---- MAIN LOGIC ----
+    async function optimizeCode() {
+      const code = document.getElementById("inputCode").value;
+      const result = document.getElementById("result");
+
+      if (!code.trim()) {
+        result.innerHTML = "<span style='color:red;'>Please paste your code first.</span>";
+        return;
+      }
+
+      result.innerHTML = "<div class='loading'>⏳ Talking to your AI agent and optimizing your code...</div>";
+
+      const payload = {
+        user_id: "gulbeersinghchauhan444@gmail.com",
+        agent_id: "6916c77ec2538288e2760b31",
+        session_id: "6916c77ec2538288e2760b31-websession",
+        message: `Optimize this code:\n${code}`
+      };
+
+      try {
+        const response = await fetch("https://agent-prod.studio.lyzr.ai/v3/inference/chat/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": "YOUR_API_KEY_HERE"  <!-- PUT your API key here for local testing -->
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (data && data.response) {
+          // Response is markdown-style text; just show as preformatted
+          result.innerHTML = data.response.replace(/\n/g, "<br>");
+        } else {
+          result.innerHTML = "⚠ No response from agent.";
+        }
+      } catch (error) {
+        console.error(error);
+        result.innerHTML = "<span style='color:red;'>❌ Error: " + error + "</span>";
+      }
+    }
+
+    function clearInput() {
+      document.getElementById("inputCode").value = "";
+      document.getElementById("result").innerHTML =
+        "<span style='opacity:0.7;'>Your optimized code & explanation will appear here...</span>";
+    }
+
+    function downloadResult() {
+      const resultDiv = document.getElementById("result");
+      const text = resultDiv.innerText || "No result yet.";
+
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "optimized_code.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
